@@ -1,0 +1,201 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[l2tabu,orthodox]{nag}% Old habits die hard. All the same, there are commands, classes and packages which are outdated and superseded. nag provides routines to warn the user about the use of those.
+
+\usepackage[all,error]{onlyamsmath}% Error on deprecated math commands like $$ $$.
+\usepackage{ amssymb }
+\usepackage{listings}
+\title{COMP3311}
+\lstset{language=SQL}
+\author{Minjie Shen}
+
+\newcommand{\set}[2]{\{#1|#2\}}
+
+\begin{document}
+  \maketitle
+
+\section{Data models}
+  \subsection{Entity-Relationship Model}
+    \subsubsection{definition}
+      The Entity-Relationship (ER) model is a highlevel conceptual data model\\
+    \subsubsection{Entity type}
+      Group of object with the same properties (similar to type in other programming languages)
+    \subsubsection{Attribute}
+      A porperty of object (entity), describe properties of entities.
+    \subsubsection{Relationship}
+      n-way, non-directional.
+  \subsection{Entity and Attributes}
+    Mathematically, an attribute A of an entity type E is a function, $A:~E \rightarrow P(V)$\\
+    For single-valued attributes, A(e) must be a singleton.
+    \subsubsection{key}
+      a set of attributes that uniquely identifies an entity.
+    \subsubsection{syntax}
+      We can describe schemata with composite attributes using ()’s and with multi-valued attributes using \{\}’s.
+  \subsection{relationship}
+    An association between things. A relationship type $R$ involving $E_1,E_2...E_n$ has property: $R \subset E_1 \times .. \times E_n$.
+    \subsubsection{Recursive relation}
+      An entity plays different roles in relationship.
+  \subsection{Weak entity types}
+    Entities that don't have key of its own
+  \subsection{EER diagram}
+    Specialisation: the process of defining a set of subclasses of an entity type; this entity type is called the superclass of the specialization.
+    \\
+    Generalisation: a reverse of previous section.
+    \subsubsection{Symbol}
+    $[p] - (d) ->- [s], partial disjoint$\\
+    $[p] = (d) ->- [s], total disjoint$\\
+    $[p] - (o) ->- [s], partial overlapping$\\
+    $[p] = (o) ->- [s], total overlapping$\\
+  \subsection{Relational Data Model}
+    \subsubsection{Structures}
+      \begin{itemize}
+        \item Everything is described using relations
+        \item A relation can be thought of as a named table
+        \item Each column of the table corresponds to a named attribute.
+        \item The set of allowed values for an attribute is called its domain.
+        \item Each row is a relation
+        \item Composite and multivalued attributes are disallowed!  
+      \end{itemize}
+    \subsubsection{Super key}
+      A superkey is a set of attributes that uniquely determines a tuple.
+    \subsubsection{Candidate key}
+      A candidate key is a superkey, none of whose proper subsets is a superkey
+    \subsubsection{Primary key}
+      A primary key is a designated candidate key
+    \subsubsection{Integrity constraints}
+      \begin{itemize}
+        \item Key constraint: candidate key value must be unique
+        \item Entity integrity: attribute that's part of primary key os not nullable
+        \item Referential integrity: The value of FK must occur in the other relation or be entirely
+NULL.
+      \end{itemize}
+  \subsection{ER to RD mapping}
+    \begin{itemize}
+      \item For all normal entity, create R with all simple attributes and choose one of the keys as primary key for the relation
+      \item For all specialised entity type of P, createa relation R with key of P and simple attributes of E.
+      \item For each weak entity W, with owner type E, create R with all simple attr of W and foreign key to prime attr of E. Key will be foreign key + partial key of W.
+      \item handle 1 to 1 relation. Put it in one side involved.
+      \item handle 1:N relation. Put it it in the N side
+      \item handle N:M relation: Create new relation and add two sides as foreign key. Key will be Key of both sides combined.
+      \item handle multivalued attribute. Create new relation for it + primary key of the owner. Key will be all attributes.
+      \item handle n-ary relation: same as N to M.
+    \end{itemize}
+\section{Relational Algebra}
+  Relational Algebra is a procedural DML
+  \subsection{SELECT}
+    \subsubsection{definition}
+      Selects a subset of the tuples of a relation r, satisfying some condition: $\sigma_B (r) = \{ t \in r | B(t) \}$
+    \subsubsection{properties}
+      \begin{itemize}
+        \item Commutative: $\sigma_{c1}(\sigma_{c2}(R)) = \sigma_{c2}(\sigma_{c1}(R))$
+        \item Combination: $\sigma_{c1}(\sigma_{c2}(R)) = \sigma_{c1~AND~c2}(R)$
+      \end{itemize}
+  \subsection{PROJECT}
+    \subsubsection{definition}
+      Selects a subset of attributes of a relation. $\pi_X(r) = \{t[X] | t \in r\}$
+    \subsubsection{properties}
+      \begin{itemize}
+        \item if $list1 \subset list2$ then $\pi_{list1}(\pi_{list2}(R)) = \pi_{list1}(R)$, otherwise illegal.
+        \item commutative: $\pi_{X}(\sigma_{B}(R)) = \sigma_{B}(\pi_{X}(R))$ if B specifies within X.
+      \end{itemize}
+  \subsection{UNION}
+    Just normal union stuff. $r \cup s = \set{t}{t \in r~OR~t \in s }$
+  \subsection{INTERSECTION}
+    Just normal intersection stuff. $r \cap s = \set{t}{t \in r~AND~t \in s }$
+  \subsection{DIFFERENCE}
+    $r - s = \set{t}{t \in r~AND~ t \notin s}$
+  \subsection{CARTESIAN PRODUCT}
+    $r \times s = \set{t_1 || t_2}{t_1 \in r~AND~t_2 \in s}$\\
+    equi-join: join performed based on the equality of matching attributes.
+  \subsection{JOIN}
+    $r \bowtie_B s = \set{t_1 || t_2}{t_1 \in r~AND~t_2 \in s ~AND~B}$\\
+    \subsubsection{Equi-join}
+      Equi-join is a theta-join where each comparison operator is “=”.
+    \subsubsection{Natural join}
+      Natural join is an equi-join where only one attribute from each comparison is retained.
+  \subsection{DIVIDE}
+    $R \div S = \set{t}{t \times S \in R}$
+    
+\section{Database Languages}
+  \subsection{SQL}
+    \begin{itemize}
+      \item Quotes are escaped by doubling them ('')
+      \item Some of the frequently-used keywords: ALTER AND CREATE FROM INSERT NOT OR SELECT TABLE WHERE
+      \item Built-in datatype: strings, numbers, dates, bit-strings
+      \item The NULL value is a member of all data types.
+      \item Two kinds of string are available: CHAR(n) - has padding, VARCHAR(n) - no padding
+      \item trailing space is ignored in comparison
+      \item String
+      \begin{itemize}
+        \item compare: dict order, LIKE: $\%$ same as *, \_ same as .
+        \item manipulation: concat: $||$, LENGTH(s): gives length, SUBSTR(str, start, length) match starting from startth char to the length (start starts from 1)
+      \end{itemize}
+      \item Dates
+      \begin{itemize}
+        \item format: DD-Mon-YYYY
+        \item (start1, end1) OVERLAPS (start2, end2) -> gives whether two dateranges overlaps
+      \end{itemize}
+      \item Numbers
+      \begin{itemize}
+        \item smallint, int, bigint ... 2-bytes, 4-bytes and 8-bytes integers
+        \item real, double precision... 4-bytes and 8-bytes floating point
+        \item numeric(precision, scale) - The precision of a numeric is the total count of significant digits
+in the whole number
+        \item $\pi_X(R)$ is implemented in SQL as: SELECT X FROM R
+        \item One could eliminate the duplicates by using DISTINCT.
+      \end{itemize}
+      \item R1 UNION R2, R1 INTERSECT R2, R1 EXCEPT R2
+      \item Aggregation: SUM, AVG, MIN, MAX, COUNT
+      \item Use HAVING to eliminate groups
+    \end{itemize}
+  \subsection{PLpgSQL}
+    \subsubsection{Create type}
+      CREATE TYPE, CREATE DOMAIN \\
+      create domain UnswCourseCode as text \\
+      check ( value ~ '[A - Z ]{4}[0 -9]{4} ' );
+    %TODO: More PLpgSQL
+    \subsubsection{Bored let's do it next time}
+\section{Functional Dependency}
+  \subsection{definition}
+    X (functionally) determines Y, $X \rightarrow Y$, iff $t_1[X] = t_2[X] implies t_1[Y] = t_2[Y]$.
+  \subsection{infer}
+    $F infers X \rightarrow Y ( F |= X \rightarrow Y)$ means $R~satisfies~F -> R~satisfies~X\rightarrow Y$.
+  \subsection{Armstrong's axioms}
+    \begin{itemize}
+      \item Reflexivity: $Y \subseteq X \Rightarrow X \rightarrow Y$
+      \item Augmentation $\{X \rightarrow Y\} |= XZ \rightarrow YZ$
+      \item Transitivity $\{X \rightarrow Y, Y \rightarrow Z\} |= X \rightarrow Z$
+      \item Additivity: $\{X \rightarrow Y, X \rightarrow Z\} |= X \rightarrow YZ$
+      \item Projectivity: $\{X \rightarrow YZ\} |= X \rightarrow Y$
+      \item Pseudotransitivity $\{X \rightarrow Y, YZ \rightarrow W\} |= XZ \rightarrow W$
+    \end{itemize}
+  \subsection{Checking FD}
+    $F^+$ is the smallest set of FD that contains F and closed under Armstrong's axioms.\\
+    Somehow we can prove: $X^+ = \cup_{\forall X \rightarrow A \in F^+}A$ and $X\rightarrow Y \in F^+ \rightleftharpoons Y \subseteq X^+$.
+  \subsection{Compute Candidate key}
+    Find X such that $X^+ = R$.
+    \subsubsection{Algorithm}
+      Assign $X$ a super key in $F$ (all attrs on left hand side of FDs). Remove attr from $X$ while remain $X^+ = R$ till no reduction on $X$.
+\section{Normal Form}
+  \subsection{1NF}
+    No multivalue, composite attributes.
+    \subsubsection{drawback}
+      A lot of duplicated entries
+  \subsection{2NF}
+    A prime attribute is one that's part of a candidate key. In an FD $X\rightarrow Y$, Y is fully FD on X if no $Z \subset X$ such that $Z \rightarrow Y$, otherwise it's not fulling dependent. 2NF -> all non-prime attr are fully functionally dependent. 
+    \subsubsection{drawback}
+      Record A and record B both associated with something. That might be stored twice.
+  \subsection{3NF}
+    $X \rightarrow Z$ and $Z \rightarrow Y$ and $Z \nrightarrow X$. 3NF: All NONE\_TRIVIAL FD $X \rightarrow A$ either $X$ is super key or $A$ is prime attr.
+  \subsection{BCNF}
+    whenever $X \rightarrow A$ holds is non-trivial, $X$ is a super key.
+    http://www.cse.unsw.edu.au/~cs3311/17s1/lectures/w5/3311_week5_2.pdf
+\end{document}
+
+
+
+
+
+
+
+
+
