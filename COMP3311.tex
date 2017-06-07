@@ -53,7 +53,7 @@
         \item Each column of the table corresponds to a named attribute.
         \item The set of allowed values for an attribute is called its domain.
         \item Each row is a relation
-        \item Composite and multivalued attributes are disallowed!  
+        \item Composite and multivalued attributes are disallowed!
       \end{itemize}
     \subsubsection{Super key}
       A superkey is a set of attributes that uniquely determines a tuple.
@@ -114,7 +114,7 @@ NULL.
       Natural join is an equi-join where only one attribute from each comparison is retained.
   \subsection{DIVIDE}
     $R \div S = \set{t}{t \times S \in R}$
-    
+
 \section{Database Languages}
   \subsection{SQL}
     \begin{itemize}
@@ -181,21 +181,186 @@ in the whole number
     \subsubsection{drawback}
       A lot of duplicated entries
   \subsection{2NF}
-    A prime attribute is one that's part of a candidate key. In an FD $X\rightarrow Y$, Y is fully FD on X if no $Z \subset X$ such that $Z \rightarrow Y$, otherwise it's not fulling dependent. 2NF -> all non-prime attr are fully functionally dependent. 
+    A prime attribute is one that's part of a candidate key. In an FD $X\rightarrow Y$, Y is fully FD on X if no $Z \subset X$ such that $Z \rightarrow Y$, otherwise it's not fulling dependent. 2NF -> all non-prime attr are fully functionally dependent.
     \subsubsection{drawback}
       Record A and record B both associated with something. That might be stored twice.
   \subsection{3NF}
     $X \rightarrow Z$ and $Z \rightarrow Y$ and $Z \nrightarrow X$. 3NF: All NONE\_TRIVIAL FD $X \rightarrow A$ either $X$ is super key or $A$ is prime attr.
   \subsection{BCNF}
     whenever $X \rightarrow A$ holds is non-trivial, $X$ is a super key.
-    http://www.cse.unsw.edu.au/~cs3311/17s1/lectures/w5/3311_week5_2.pdf
+  \subsection{3NF transformation}
+    \subsubsection{decomposition}
+      $\{R1, R2, R3 .. Rn\}$ is decomposition of R if $\cup^{n}_{i=1}R_i = R$.
+    \subsubsection{dependency preserving}
+      Two sets F and G are equivalent if $F^+ = G^+$. Decomposition need to make sure: $F^+ = (\cup^n_{i=1}F_i)^+$.
+    \subsubsection{testing lossless join}
+      1. create S, each $s_{i,j} \in S$ corresponds $R_i$ and attr $A_j$.\\
+      2. Repeat:\\
+        for each $X \rightarrow Y$, choose rows where all attr in X has a.\\
+        In those rows where elements corresponding to Y also take value a if one of the chosen rows take the value a on Y.
+    \subsubsection{Algorithm to BCNF}
+      while $\exists R \in D~and~R_i \notin BCNF$ \{\\
+        find $X \rightarrow Y$ in $R_i$ that violates BCNF, replace $R_i$ in $D$ by $(R_i - Y)~and~(X \cup Y)$;\\
+      \}
+    \subsubsection{Algorithm to min cover}
+      \begin{itemize}
+        \item Reduce right: U know how
+        \item Reduce right: $X \rightarrow A \in F$ where $X = \set{A_i}{1 <= i <= k}$, if $A \in (X - \{A_i\})^+$ for $i = 1~to~k$.
+        \item Remove redundant: U know how
+      \end{itemize}
+    \subsubsection{3NF decomp algorithm}
+      \begin{itemize}
+        \item create union of RHS
+        \item add all none existing ones into the union.
+      \end{itemize}
+\section{Disk and File}
+  \subsection{storages}
+    \begin{itemize}
+      \item Primary Storage: main memory
+      \item Secondary Storage: hard disk
+      \item Tertiary Storage: other stuff
+    \end{itemize}
+  \subsection{Speed it up}
+    \begin{itemize}
+      \item Improve Disk Access (Access pattern)
+      \item Keep track of free blocks
+      \item Use OS FS to manage disk space
+    \end{itemize}
+  \subsection{Buffer management}
+    \subsubsection{Buffer manager}
+      manages traffic between disk and memory with buffer pool in main memory. (Buffer pool is collection of frames).
+      \begin{itemize}
+        \item request\_block: if in buffer, use copy. Otherwise fetch from harddisk then replace.
+        \item release\_block: make it good candidate for removal.
+        \item write\_block: set dirty bit on
+        \item force\_block: force to write to disk
+      \end{itemize}
+    \subsubsection{Replacement policy}
+      \begin{itemize}
+        \item LRU
+        \item FIFO
+        \item MRU
+        \item random
+      \end{itemize}
+      Neither is better
+      \begin{itemize}
+        \item Fix length record: access by offset
+        \item Prefixed with an array of offset
+      \end{itemize}
+    \subsubsection{Block formats}
+      definition: A block is a collection of slots which each contains a record.
+\section{Indexing}
+  Three types of organisations: Heap Files, Sorted Files, Hashed Files.\\
+  D: read/write disk page.\\
+  C: process a record.\\
+  H: time to hash.\\
+  \subsection{Heap}
+    B: \# of pages, R: \# of record in a page
+    \subsubsection{Scan}
+      $B * (D + R * C)$
+    \subsubsection{SWES(search with equal selection)}
+      $0.5 * B * (D + R * C)$ if on one record, otherwise full scan
+    \subsubsection{SWRS}
+      $B * (D + R * C)$
+    \subsubsection{insert}
+      $2 * D + C$(read, process, write)
+    \subsubsection{delete}
+      if know page, then like write. Otherwise scan + write.
+  \subsection{Sorted}
+    \subsubsection{Scan}
+      $B * (D + R * C)$
+    \subsubsection{SWES}
+      One record: $log_2(B) * D + C * log_2(R)$,
+      multiple: $log_2(B) * D + C * log_2(R) + \#matches$
+    \subsubsection{SWRS}
+      $log_2(B) * D + C * log_2(R) + \#matches$
+    \subsubsection{insert/delete}
+      $search + 2 * (0.5 * B * (D + R * C))$
+  \subsection{Hashed}
+    \subsubsection{Scan}
+      $1.25 * B * (D + R * C)$
+    \subsubsection{SWES}
+      $H + D + 0.5 * C * R$
+    \subsubsection{SWRS}
+      Scan!
+    \subsubsection{Insert/delete}
+      If only one blck: $Search + C + D$
+  \subsection{Clustered Index}
+    A file is organized of data records is the smae as or close to the ordering of data entries in some index.
+\section{Transaction}
+  \subsection{definition}
+    Each program unit is a transaction that either. accesses the contents of the database, or changes the state of the database, from one consistent state to another.
+  \subsection{Operations}
+    \begin{itemize}
+      \item Read
+      \item Write
+      \item Computation
+    \end{itemize}
+    Partially committed point: At this point, check and enforce the correctness of the concurrent execution
+    Committed state: Once a transaction enters the committed state, it has concluded its execution successfully.
+  \subsection{ACID}
+    \begin{itemize}
+      \item Atomicity: Transaction either performed or not.
+      \item Consistency preservation: Correct transaction results in consistent state.
+      \item isolation: no updates should be visible until committed
+      \item Durability: once committed, change shouldn't be lost.
+    \end{itemize}
+  \subsection{Recover from failure - Log-based recovery}
+      \begin{itemize}
+        \item undo logging
+        \item redo logging
+        \item undo/redo logging
+      \end{itemize}
+      \begin{itemize}
+        \item start transaction \[start transaction, T\]
+        \item \[read item, T, X\]
+        \item \[write item, T, X, oldV, newV\]
+        \item \[commit, T\]
+        \item \[abort, T\]
+      \end{itemize}
+      recovery strategy: undo all uncommitted transactions, redo all committed transactions\\
+      If there's checkpoint, only care about those ended after checkpoint.
+  \subsection{Concurrency control}
+    assumption: a serial schedule is guarranteed to be correct.
+    \\ A schedule is serializable if it always produces the same result as some serial schedule.
+    \\ Serial schedule: Schedule that does not interleave the actions of different transactions.
+    \\ Equivalent schedules: getting same result
+    \\ Serializable schedule: result equal to some serial schedule.
+    \\ conflict equivalent: 1. involve same actions of the same transactions. 2. conflicting actions are ordered the same way.
+    \subsubsection{Testing conflict serializable}
+    \begin{itemize}
+      \item Construct a schedule graph:
+        \begin{itemize}
+          \item G = (V, A) consists of vertex set V and arc set A.
+          \item V is a transaction. $T_i~and~T_j$, $T_i\rightarrow T_j$ if $O_1 \in T_i, O_2 \in T_j$, $O_1$ before $O_2$, operating on the same item and one of them is write.
+        \end{itemize}
+      \item check if the graph is cyclic -> non-serializable
+    \end{itemize}
+    Concurrency control method:
+    \begin{enumerate}
+      \item Obtain Read lock if $\forall operation, read$ otherwise write lock.
+      \item unlock after operation on X in T has been executed.
+    \end{enumerate}
+    Two phase locking
+    \begin{enumerate}
+      \item growing phase: all locks for a transaction must be obtained before any locks are released
+      \item shrinking phase: gradually release all locks
+    \end{enumerate}
+    \subsubsection{Deadlock}
+      Create a wait-for graph: v for each T, $T_i$ to $T_j$ if $T_i$ is waiting for an item locked by $T_j$. If there's cycle, deadlock!
+    \subsubsection{Deadlock solution}
+      \begin{enumerate}
+        \item deadlock detection: suitable if transactions are short
+        \item deadlock prevention: assign priority based on timestamps.
+      \end{enumerate}
+    \subsubsection{Timestamp ordering}
+      Assign timestap to start of transaction.\\
+      \lstinputlisting[language=Python]{1.java}
+      problems:
+      \begin{itemize}
+        \item Cyclic restart
+        \item cascading rollback
+      \end{itemize}
+\section{Spatial}
+  I have no idea what's going on
 \end{document}
-
-
-
-
-
-
-
-
-
